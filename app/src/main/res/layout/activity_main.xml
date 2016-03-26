@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.petasoft.gustavo.locateplayer.MainActivity"
+    android:weightSum="1">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:orientation="horizontal"
+        android:background="#00CDCD"
+        android:layout_alignParentStart="false"
+        android:gravity="center"
+        android:layout_weight="0.03">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textColor="#FFFFFF"
+            android:text="LOCATE"
+            android:textSize="28sp"
+            android:textAlignment="center"
+            android:textStyle="bold"
+            android:gravity="center_vertical"
+            />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/logo"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textColor="#FFFFFF"
+            android:text="PLAYER"
+            android:textSize="28sp"
+            android:textAlignment="center"
+            android:gravity="center_vertical" />
+    </LinearLayout>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="257dp"
+        android:id="@+id/musicListView"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.16"/>
+
+    <LinearLayout
+        android:layout_height="50dp"
+        android:layout_width="match_parent"
+        android:background="#1A1A1A"
+        android:layout_weight="0.47">
+    </LinearLayout>
+    <LinearLayout
+        android:layout_height="40dp"
+        android:layout_width="match_parent"
+        android:background="#1C242A"
+        android:layout_weight="0.39"
+        android:weightSum="1"
+        android:gravity="center">
+
+    </LinearLayout>
+</LinearLayout>
