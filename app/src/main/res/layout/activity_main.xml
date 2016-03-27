@@ -58,9 +58,17 @@
         android:layout_height="40dp"
         android:layout_width="match_parent"
         android:background="#1C242A"
-        android:layout_weight="0.39"
+        android:layout_weight="0.35"
         android:weightSum="1"
         android:gravity="center">
 
+        <ImageView
+            android:layout_width="90dp"
+            android:layout_height="75dp"
+            android:id="@+id/imageView"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/playbutton"
+            android:onClick="playPauseMusic"
+            android:clickable="true"/>
     </LinearLayout>
 </LinearLayout>

@@ -3,11 +3,14 @@ package com.petasoft.gustavo.locateplayer;
 import android.app.AlertDialog;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
+import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.view.Window;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import java.io.File;
@@ -15,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static boolean play = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,5 +59,16 @@ public class MainActivity extends AppCompatActivity {
             alertDialog.show();
         }
 
+    }
+
+    public void playPauseMusic(View view){
+        ImageView imgView= (ImageView) findViewById(R.id.imageView);
+        if(play){
+            imgView.setImageResource(R.drawable.playbutton);
+        }
+        else{
+            imgView.setImageResource(R.drawable.pausebutton);
+        }
+        play = !play;
     }
 }
