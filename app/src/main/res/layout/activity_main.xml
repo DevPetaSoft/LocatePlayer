@@ -53,6 +53,12 @@
         android:layout_width="match_parent"
         android:background="#1A1A1A"
         android:layout_weight="0.47">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/artistText"
+            android:textColor="#ffffff"
+            android:textSize="20sp" />
     </LinearLayout>
     <LinearLayout
         android:layout_height="40dp"
@@ -66,7 +72,8 @@
             android:layout_width="67dp"
             android:layout_height="56dp"
             android:id="@+id/imageView3"
-            android:src="@drawable/nextleftbutton"/>
+            android:src="@drawable/nextleftbutton"
+            android:onClick="previousMusic"/>
 
         <ImageView
             android:layout_width="90dp"
@@ -82,6 +89,7 @@
             android:layout_height="56dp"
             android:id="@+id/imageView2"
             android:src="@drawable/nextrightbutton"
+            android:onClick="nextMusic"
             />
 
 
