@@ -53,13 +53,72 @@
         android:layout_width="match_parent"
         android:background="#1A1A1A"
         android:layout_weight="0.47">
-        <TextView
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/artistText"
-            android:textColor="#ffffff"
-            android:textSize="20sp" />
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:id="@+id/albumImage"
+                android:layout_gravity="center"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="10dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_marginRight="10dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="28dp"
+                    android:id="@+id/musicNameText"
+                    android:textColor="#ffffff"
+                    android:textSize="20sp"
+                    android:text="teste"
+                    android:layout_marginTop="14dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/artistText"
+                    android:textColor="#ffffff"
+                    android:textSize="13sp"
+                    android:text="teste" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="right">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/currentTime"
+                        android:textColor="#ffffff"
+                        android:textSize="13sp"
+                        android:text="0:00" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#ffffff"
+                        android:textSize="13sp"
+                        android:text="/" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/musicTime"
+                        android:textColor="#ffffff"
+                        android:textSize="13sp"
+                        android:text="3:00" />
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
     </LinearLayout>
+
     <LinearLayout
         android:layout_height="40dp"
         android:layout_width="match_parent"

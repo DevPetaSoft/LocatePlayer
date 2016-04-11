@@ -3,9 +3,13 @@ package com.petasoft.gustavo.locateplayer;
 import android.app.AlertDialog;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,10 +21,15 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,6 +38,12 @@ public class MainActivity extends AppCompatActivity {
     private static int musicListIndex;
     private static List<String> minhaLista;
     private static MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+    private byte[] art;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,30 +51,26 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final File file;
-
         final ListView listView = (ListView) findViewById(R.id.musicListView);
         final TextView artistTextView = (TextView) findViewById(R.id.artistText);
+        final TextView musicNameText = (TextView) findViewById(R.id.musicNameText);
+        final TextView durationText = (TextView) findViewById(R.id.musicTime);
 
-        final ImageView playPauseButton= (ImageView) findViewById(R.id.imageView);
+        final ImageView playPauseButton = (ImageView) findViewById(R.id.imageView);
+        final ImageView albumImage = (ImageView) findViewById(R.id.albumImage);
         minhaLista = new ArrayList<String>();
         try {
 
-            String root_sd = Environment.getExternalStorageDirectory().toString()+"/Music";
-            file = new File(root_sd );
+            String root_sd = Environment.getExternalStorageDirectory().toString() + "/Music";
+            file = new File(root_sd);
             File list[] = file.listFiles();
 
             for (int i = 0; i < list.length; i++) {
                 minhaLista.add(list[i].getName());
             }
-            music.setDataSource(Environment.getExternalStorageDirectory() + "/Music/"+minhaLista.get(0));
-            mmr.setDataSource(Environment.getExternalStorageDirectory() + "/Music/" + minhaLista.get(0));
-            String artistName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-            artistTextView.setText(artistName);
-            musicListIndex = 0;
-            music.prepare();
+            setMusic(Environment.getExternalStorageDirectory() + "/Music/" + minhaLista.get(0),0);
             listView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, minhaLista));
-        } catch (Exception ex)
-        {
+        } catch (Exception ex) {
             ContextWrapper cw = new ContextWrapper(getApplicationContext());
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
             alertDialog.setTitle("Alert");
@@ -76,8 +87,7 @@ public class MainActivity extends AppCompatActivity {
         //Evento de click de um elemento de um list view
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view,int position, long id)
-            {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 String selectedFromList = (listView.getItemAtPosition(position).toString());
                 try {
@@ -87,9 +97,7 @@ public class MainActivity extends AppCompatActivity {
                     music.start();
                     play = true;
                     playPauseButton.setImageResource(R.drawable.pausebutton);
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
                     alertDialog.setTitle("Alert");
                     alertDialog.setMessage(ex.getMessage());
@@ -104,15 +112,42 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
-    public void playPauseMusic(View view){
-        ImageView imgView= (ImageView) findViewById(R.id.imageView);
-        if(play){
+    public void setMusic(String uri,int listIndex) throws IOException {
+        final TextView artistTextView = (TextView) findViewById(R.id.artistText);
+        final TextView musicNameText = (TextView) findViewById(R.id.musicNameText);
+        final TextView durationText = (TextView) findViewById(R.id.musicTime);
+        final ImageView albumImage = (ImageView) findViewById(R.id.albumImage);
+        music.setDataSource(uri);
+        music.prepare();
+        mmr.setDataSource(uri);
+        String artistName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+        String musicName = minhaLista.get(listIndex).replace(".mp3", "");
+        int duration = music.getDuration();
+        int minutes = (int)((duration/(1000*60))%60);
+        int seconds = (int)(duration/(1000)%60);
+        durationText.setText(minutes+":"+seconds);
+        art = mmr.getEmbeddedPicture();
+        if (art != null) {
+            Bitmap songImage = BitmapFactory.decodeByteArray(art, 0, art.length);
+            albumImage.setImageBitmap(songImage);
+        }
+        musicNameText.setText(musicName);
+        artistTextView.setText(artistName);
+        musicListIndex = listIndex;
+
+    }
+
+    public void playPauseMusic(View view) {
+        ImageView imgView = (ImageView) findViewById(R.id.imageView);
+        if (play) {
             imgView.setImageResource(R.drawable.playbutton);
             music.pause();
-        }
-        else{
+        } else {
             imgView.setImageResource(R.drawable.pausebutton);
             music.start();
         }
@@ -121,35 +156,65 @@ public class MainActivity extends AppCompatActivity {
 
     public void nextMusic(View view) throws IOException {
         musicListIndex += 1;
-        musicListIndex = musicListIndex%minhaLista.size();
+        musicListIndex = musicListIndex % minhaLista.size();
         music.reset();
-        music.setDataSource(Environment.getExternalStorageDirectory() + "/Music/"+minhaLista.get(musicListIndex));
-        mmr.setDataSource(Environment.getExternalStorageDirectory() + "/Music/" + minhaLista.get(musicListIndex));
-        String artistName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-        final TextView artistTextView = (TextView) findViewById(R.id.artistText);
-        artistTextView.setText(artistName);
-        music.prepare();
+        setMusic(Environment.getExternalStorageDirectory() + "/Music/" + minhaLista.get(musicListIndex),musicListIndex);
         music.start();
         play = true;
-        ImageView playPauseButton= (ImageView) findViewById(R.id.imageView);
+        ImageView playPauseButton = (ImageView) findViewById(R.id.imageView);
         playPauseButton.setImageResource(R.drawable.pausebutton);
     }
 
     public void previousMusic(View view) throws IOException {
         musicListIndex -= 1;
-        if(musicListIndex<0){
-            musicListIndex = minhaLista.size()-1;
+        if (musicListIndex < 0) {
+            musicListIndex = minhaLista.size() - 1;
         }
         music.reset();
-        music.setDataSource(Environment.getExternalStorageDirectory() + "/Music/"+minhaLista.get(musicListIndex));
-        mmr.setDataSource(Environment.getExternalStorageDirectory() + "/Music/" + minhaLista.get(musicListIndex));
-        String artistName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-        final TextView artistTextView = (TextView) findViewById(R.id.artistText);
-        artistTextView.setText(artistName);
-        music.prepare();
+        setMusic(Environment.getExternalStorageDirectory() + "/Music/" + minhaLista.get(musicListIndex),musicListIndex);
         music.start();
         play = true;
-        ImageView playPauseButton= (ImageView) findViewById(R.id.imageView);
+        ImageView playPauseButton = (ImageView) findViewById(R.id.imageView);
         playPauseButton.setImageResource(R.drawable.pausebutton);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.petasoft.gustavo.locateplayer/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.petasoft.gustavo.locateplayer/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
     }
 }
