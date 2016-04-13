@@ -1,6 +1,7 @@
 package com.petasoft.gustavo.locateplayer;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -11,8 +12,10 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -20,10 +23,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,25 +45,49 @@ public class MainActivity extends AppCompatActivity {
     private static List<String> minhaLista;
     private static MediaMetadataRetriever mmr = new MediaMetadataRetriever();
     private byte[] art;
+
+    private int duration;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
 
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         final File file;
         final ListView listView = (ListView) findViewById(R.id.musicListView);
         final TextView artistTextView = (TextView) findViewById(R.id.artistText);
         final TextView musicNameText = (TextView) findViewById(R.id.musicNameText);
         final TextView durationText = (TextView) findViewById(R.id.musicTime);
+        final TextView currentPositionText = (TextView) findViewById(R.id.currentTime);
 
         final ImageView playPauseButton = (ImageView) findViewById(R.id.imageView);
         final ImageView albumImage = (ImageView) findViewById(R.id.albumImage);
+        final Handler handler = new Handler();
+
+        final Runnable r = new Runnable() {
+            public void run() {
+
+
+                if(music.isPlaying()) {
+                    duration = music.getCurrentPosition();
+                    int minutes = (int)((duration/(1000*60))%60);
+                    int seconds = (int)(duration/(1000)%60);;
+                    currentPositionText.setText(String.format("%02d:%02d",minutes,seconds));
+                }
+
+                handler.postDelayed(this, 1000);
+            }
+        };
+
+        handler.postDelayed(r, 1000);
+
         minhaLista = new ArrayList<String>();
         try {
 
@@ -129,8 +159,8 @@ public class MainActivity extends AppCompatActivity {
         String musicName = minhaLista.get(listIndex).replace(".mp3", "");
         int duration = music.getDuration();
         int minutes = (int)((duration/(1000*60))%60);
-        int seconds = (int)(duration/(1000)%60);
-        durationText.setText(minutes+":"+seconds);
+        int seconds = (int)(duration/(1000)%60);;
+        durationText.setText(String.format("%02d:%02d",minutes,seconds));
         art = mmr.getEmbeddedPicture();
         if (art != null) {
             Bitmap songImage = BitmapFactory.decodeByteArray(art, 0, art.length);
@@ -166,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void previousMusic(View view) throws IOException {
+
         musicListIndex -= 1;
         if (musicListIndex < 0) {
             musicListIndex = minhaLista.size() - 1;
@@ -217,4 +248,6 @@ public class MainActivity extends AppCompatActivity {
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
     }
+
+
 }

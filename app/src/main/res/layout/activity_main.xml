@@ -99,7 +99,7 @@
                         android:id="@+id/currentTime"
                         android:textColor="#ffffff"
                         android:textSize="13sp"
-                        android:text="0:00" />
+                        android:text="00:00" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -112,7 +112,7 @@
                         android:id="@+id/musicTime"
                         android:textColor="#ffffff"
                         android:textSize="13sp"
-                        android:text="3:00" />
+                        android:text="00:00" />
                 </LinearLayout>
             </LinearLayout>
 
