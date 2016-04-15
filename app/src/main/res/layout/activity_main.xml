@@ -114,6 +114,15 @@
                         android:textSize="13sp"
                         android:text="00:00" />
                 </LinearLayout>
+
+                <SeekBar
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/seekBar"
+                    android:progressDrawable="@layout/progress_bar"
+                    android:minHeight="3dip"
+                    android:maxHeight="3dip"
+                    android:thumb="@layout/seekbar_thumb"/>
             </LinearLayout>
 
         </LinearLayout>

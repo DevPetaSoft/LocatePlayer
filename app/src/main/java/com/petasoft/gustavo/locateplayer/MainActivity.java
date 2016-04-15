@@ -22,6 +22,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
     private static List<String> minhaLista;
     private static MediaMetadataRetriever mmr = new MediaMetadataRetriever();
     private byte[] art;
+    private boolean isMoveingSeekBar = false;
+    private SeekBar mSeekBar = null;
 
     private int duration;
     /**
@@ -62,31 +65,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final File file;
         final ListView listView = (ListView) findViewById(R.id.musicListView);
-        final TextView artistTextView = (TextView) findViewById(R.id.artistText);
-        final TextView musicNameText = (TextView) findViewById(R.id.musicNameText);
-        final TextView durationText = (TextView) findViewById(R.id.musicTime);
         final TextView currentPositionText = (TextView) findViewById(R.id.currentTime);
 
         final ImageView playPauseButton = (ImageView) findViewById(R.id.imageView);
-        final ImageView albumImage = (ImageView) findViewById(R.id.albumImage);
         final Handler handler = new Handler();
+        mSeekBar = (SeekBar) findViewById(R.id.seekBar);
 
-        final Runnable r = new Runnable() {
-            public void run() {
+        mSeekBar.setOnSeekBarChangeListener(seekBarChanged);
+        mSeekBar.setProgress(0);
 
-
-                if(music.isPlaying()) {
-                    duration = music.getCurrentPosition();
-                    int minutes = (int)((duration/(1000*60))%60);
-                    int seconds = (int)(duration/(1000)%60);;
-                    currentPositionText.setText(String.format("%02d:%02d",minutes,seconds));
-                }
-
-                handler.postDelayed(this, 1000);
-            }
-        };
-
-        handler.postDelayed(r, 1000);
 
         minhaLista = new ArrayList<String>();
         try {
@@ -125,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
                     music.setDataSource(Environment.getExternalStorageDirectory().toString() + "/Music/" + selectedFromList);
                     music.prepare();
                     music.start();
+                    mSeekBar.setMax(music.getDuration());
                     play = true;
                     playPauseButton.setImageResource(R.drawable.pausebutton);
                 } catch (Exception ex) {
@@ -142,6 +130,26 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        final Runnable r = new Runnable() {
+            public void run() {
+
+                if(music.isPlaying()) {
+                    duration = music.getCurrentPosition();
+                    int minutes = (int)((duration/(1000*60))%60);
+                    int seconds = (int)(duration/(1000)%60);
+                    mSeekBar.setProgress(duration);
+                    mSeekBar.setMax(music.getDuration());
+                    Log.i("Current duration",String.format("%d", mSeekBar.getProgress()));
+                    Log.i("Duration",String.format("%d",mSeekBar.getMax()));
+
+                    currentPositionText.setText(String.format("%02d:%02d",minutes,seconds));
+                }
+
+                handler.postDelayed(this, 1000);
+            }
+        };
+        handler.postDelayed(r, 1000);
+
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
@@ -152,6 +160,10 @@ public class MainActivity extends AppCompatActivity {
         final TextView musicNameText = (TextView) findViewById(R.id.musicNameText);
         final TextView durationText = (TextView) findViewById(R.id.musicTime);
         final ImageView albumImage = (ImageView) findViewById(R.id.albumImage);
+
+       // mSeekBar.setProgress(0);
+
+        mSeekBar.setMax(music.getDuration());
         music.setDataSource(uri);
         music.prepare();
         mmr.setDataSource(uri);
@@ -166,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
             Bitmap songImage = BitmapFactory.decodeByteArray(art, 0, art.length);
             albumImage.setImageBitmap(songImage);
         }
+
         musicNameText.setText(musicName);
         artistTextView.setText(artistName);
         musicListIndex = listIndex;
@@ -208,6 +221,29 @@ public class MainActivity extends AppCompatActivity {
         ImageView playPauseButton = (ImageView) findViewById(R.id.imageView);
         playPauseButton.setImageResource(R.drawable.pausebutton);
     }
+
+
+    private SeekBar.OnSeekBarChangeListener seekBarChanged = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            isMoveingSeekBar = false;
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            isMoveingSeekBar = true;
+        }
+
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if (isMoveingSeekBar) {
+                music.seekTo(progress);
+
+                Log.i("OnSeekBarChangeListener", "onProgressChanged");
+            }
+        }
+    };
+
 
     @Override
     public void onStart() {
