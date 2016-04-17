@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar mSeekBar = null;
     private static TextView durationText;
     private static TextView currentPositionText;
+    private static Handler handler = new Handler();
 
     private int duration;
     /**
@@ -51,7 +52,21 @@ public class MainActivity extends AppCompatActivity {
      */
     private GoogleApiClient client;
 
+    private final Runnable runnable = new Runnable() {
+        public void run() {
 
+            if(music.isPlaying()) {
+                duration = music.getCurrentPosition();
+                int minutes = (int)((duration/(1000*60))%60);
+                int seconds = (int)(duration/(1000)%60);
+                mSeekBar.setProgress(duration);
+                mSeekBar.setMax(music.getDuration());
+                currentPositionText.setText(String.format("%02d:%02d",minutes,seconds));
+            }
+
+            handler.postDelayed(this, 1000);
+        }
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
         currentPositionText = (TextView) findViewById(R.id.currentTime);
         durationText = (TextView) findViewById(R.id.musicTime);
         final ImageView playPauseButton = (ImageView) findViewById(R.id.imageView);
-        final Handler handler = new Handler();
         mSeekBar = (SeekBar) findViewById(R.id.seekBar);
 
         mSeekBar.setOnSeekBarChangeListener(seekBarChanged);
@@ -120,22 +134,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final Runnable r = new Runnable() {
-            public void run() {
 
-                if(music.isPlaying()) {
-                    duration = music.getCurrentPosition();
-                    int minutes = (int)((duration/(1000*60))%60);
-                    int seconds = (int)(duration/(1000)%60);
-                    mSeekBar.setProgress(duration);
-                    mSeekBar.setMax(music.getDuration());
-                    currentPositionText.setText(String.format("%02d:%02d",minutes,seconds));
-                }
-
-                handler.postDelayed(this, 1000);
-            }
-        };
-        handler.postDelayed(r, 1000);
+        handler.postDelayed(runnable, 1000);
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -272,6 +272,18 @@ public class MainActivity extends AppCompatActivity {
         );
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        handler.removeCallbacks(runnable);
+        super.onDestroy();
+        music.stop();
+        music.reset();
+        music.release();
+
+        music = null;
     }
 
 
