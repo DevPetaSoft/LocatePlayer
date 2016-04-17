@@ -54,16 +54,16 @@ public class MainActivity extends AppCompatActivity {
 
     private final Runnable runnable = new Runnable() {
         public void run() {
-
-            if(music.isPlaying()) {
-                duration = music.getCurrentPosition();
-                int minutes = (int)((duration/(1000*60))%60);
-                int seconds = (int)(duration/(1000)%60);
-                mSeekBar.setProgress(duration);
-                mSeekBar.setMax(music.getDuration());
-                currentPositionText.setText(String.format("%02d:%02d",minutes,seconds));
+            if(music!=null) {
+                if (music.isPlaying()) {
+                    duration = music.getCurrentPosition();
+                    int minutes = (int) ((duration / (1000 * 60)) % 60);
+                    int seconds = (int) (duration / (1000) % 60);
+                    mSeekBar.setProgress(duration);
+                    mSeekBar.setMax(music.getDuration());
+                    currentPositionText.setText(String.format("%02d:%02d", minutes, seconds));
+                }
             }
-
             handler.postDelayed(this, 1000);
         }
     };
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         durationText = (TextView) findViewById(R.id.musicTime);
         final ImageView playPauseButton = (ImageView) findViewById(R.id.imageView);
         mSeekBar = (SeekBar) findViewById(R.id.seekBar);
-
+        music = new MediaPlayer();
         mSeekBar.setOnSeekBarChangeListener(seekBarChanged);
 
 
@@ -276,13 +276,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-
-        handler.removeCallbacks(runnable);
         super.onDestroy();
-        music.stop();
-        music.reset();
-        music.release();
-
+        handler.removeCallbacks(runnable);
+        if(music != null) {
+            music.stop();
+            music.reset();
+            music.release();
+        }
         music = null;
     }
 
