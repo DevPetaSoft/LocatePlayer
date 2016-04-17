@@ -1,42 +1,35 @@
 package com.petasoft.gustavo.locateplayer;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import org.w3c.dom.Text;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -48,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
     private byte[] art;
     private boolean isMoveingSeekBar = false;
     private SeekBar mSeekBar = null;
+    private static TextView durationText;
+    private static TextView currentPositionText;
 
     private int duration;
     /**
@@ -57,16 +52,14 @@ public class MainActivity extends AppCompatActivity {
     private GoogleApiClient client;
 
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final File file;
         final ListView listView = (ListView) findViewById(R.id.musicListView);
-        final TextView currentPositionText = (TextView) findViewById(R.id.currentTime);
-
+        currentPositionText = (TextView) findViewById(R.id.currentTime);
+        durationText = (TextView) findViewById(R.id.musicTime);
         final ImageView playPauseButton = (ImageView) findViewById(R.id.imageView);
         final Handler handler = new Handler();
         mSeekBar = (SeekBar) findViewById(R.id.seekBar);
@@ -76,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         minhaLista = new ArrayList<String>();
+        //Carregamento da lista de musicas
         try {
 
             String root_sd = Environment.getExternalStorageDirectory().toString() + "/Music";
@@ -88,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
             setMusic(Environment.getExternalStorageDirectory() + "/Music/" + minhaLista.get(0),0);
             listView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, minhaLista));
         } catch (Exception ex) {
-            ContextWrapper cw = new ContextWrapper(getApplicationContext());
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
             alertDialog.setTitle("Alert");
             alertDialog.setMessage(ex.getMessage());
@@ -139,9 +132,6 @@ public class MainActivity extends AppCompatActivity {
                     int seconds = (int)(duration/(1000)%60);
                     mSeekBar.setProgress(duration);
                     mSeekBar.setMax(music.getDuration());
-                    Log.i("Current duration",String.format("%d", mSeekBar.getProgress()));
-                    Log.i("Duration",String.format("%d",mSeekBar.getMax()));
-
                     currentPositionText.setText(String.format("%02d:%02d",minutes,seconds));
                 }
 
@@ -155,10 +145,10 @@ public class MainActivity extends AppCompatActivity {
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
-    public void setMusic(String uri,int listIndex) throws IOException {
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public void setMusic(String uri, int listIndex) throws IOException {
         final TextView artistTextView = (TextView) findViewById(R.id.artistText);
         final TextView musicNameText = (TextView) findViewById(R.id.musicNameText);
-        final TextView durationText = (TextView) findViewById(R.id.musicTime);
         final ImageView albumImage = (ImageView) findViewById(R.id.albumImage);
 
        // mSeekBar.setProgress(0);
@@ -178,11 +168,12 @@ public class MainActivity extends AppCompatActivity {
             Bitmap songImage = BitmapFactory.decodeByteArray(art, 0, art.length);
             albumImage.setImageBitmap(songImage);
         }
-
+        else{
+            albumImage.setImageDrawable(getDrawable(R.drawable.defaultalbumimage));
+        }
         musicNameText.setText(musicName);
         artistTextView.setText(artistName);
         musicListIndex = listIndex;
-
     }
 
     public void playPauseMusic(View view) {
@@ -209,7 +200,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void previousMusic(View view) throws IOException {
-
         musicListIndex -= 1;
         if (musicListIndex < 0) {
             musicListIndex = minhaLista.size() - 1;
@@ -238,7 +228,9 @@ public class MainActivity extends AppCompatActivity {
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if (isMoveingSeekBar) {
                 music.seekTo(progress);
-
+                int minutes = (int)((progress/(1000*60))%60);
+                int seconds = (int)(progress/(1000)%60);
+                currentPositionText.setText(String.format("%02d:%02d",minutes,seconds));
                 Log.i("OnSeekBarChangeListener", "onProgressChanged");
             }
         }
