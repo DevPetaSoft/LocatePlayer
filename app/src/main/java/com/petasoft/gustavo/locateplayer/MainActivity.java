@@ -65,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
         mSeekBar = (SeekBar) findViewById(R.id.seekBar);
 
         mSeekBar.setOnSeekBarChangeListener(seekBarChanged);
-        mSeekBar.setProgress(0);
 
 
         minhaLista = new ArrayList<String>();
@@ -102,10 +101,8 @@ public class MainActivity extends AppCompatActivity {
                 String selectedFromList = (listView.getItemAtPosition(position).toString());
                 try {
                     music.reset();
-                    music.setDataSource(Environment.getExternalStorageDirectory().toString() + "/Music/" + selectedFromList);
-                    music.prepare();
+                    setMusic(Environment.getExternalStorageDirectory().toString() + "/Music/" + selectedFromList,position);
                     music.start();
-                    mSeekBar.setMax(music.getDuration());
                     play = true;
                     playPauseButton.setImageResource(R.drawable.pausebutton);
                 } catch (Exception ex) {
@@ -151,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView musicNameText = (TextView) findViewById(R.id.musicNameText);
         final ImageView albumImage = (ImageView) findViewById(R.id.albumImage);
 
-       // mSeekBar.setProgress(0);
+        mSeekBar.setProgress(0);
 
         mSeekBar.setMax(music.getDuration());
         music.setDataSource(uri);
