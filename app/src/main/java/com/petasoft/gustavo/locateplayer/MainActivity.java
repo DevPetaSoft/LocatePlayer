@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
         final ImageView playPauseButton = (ImageView) findViewById(R.id.imageView);
         mSeekBar = (SeekBar) findViewById(R.id.seekBar);
         music = new MediaPlayer();
+        music.setOnCompletionListener(onCompletion);
         mSeekBar.setOnSeekBarChangeListener(seekBarChanged);
 
 
@@ -115,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                 String selectedFromList = (listView.getItemAtPosition(position).toString());
                 try {
                     music.reset();
-                    setMusic(Environment.getExternalStorageDirectory().toString() + "/Music/" + selectedFromList,position);
+                    setMusic(Environment.getExternalStorageDirectory().toString() + "/Music/" + selectedFromList, position);
                     music.start();
                     play = true;
                     playPauseButton.setImageResource(R.drawable.pausebutton);
@@ -134,13 +135,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
         handler.postDelayed(runnable, 1000);
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
+
+    private MediaPlayer.OnCompletionListener onCompletion = new MediaPlayer.OnCompletionListener() {
+
+        @Override
+        public void onCompletion(MediaPlayer mp) {
+            nextMusic();
+        }
+    };
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void setMusic(String uri, int listIndex) throws IOException {
@@ -149,11 +157,10 @@ public class MainActivity extends AppCompatActivity {
         final ImageView albumImage = (ImageView) findViewById(R.id.albumImage);
 
         mSeekBar.setProgress(0);
-
-        mSeekBar.setMax(music.getDuration());
         music.setDataSource(uri);
         music.prepare();
         mmr.setDataSource(uri);
+        mSeekBar.setMax(music.getDuration());
         String artistName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
         String musicName = minhaLista.get(listIndex).replace(".mp3", "");
         int duration = music.getDuration();
@@ -183,6 +190,21 @@ public class MainActivity extends AppCompatActivity {
             music.start();
         }
         play = !play;
+    }
+
+    public void nextMusic(){
+        musicListIndex += 1;
+        musicListIndex = musicListIndex % minhaLista.size();
+        music.reset();
+        try {
+            setMusic(Environment.getExternalStorageDirectory() + "/Music/" + minhaLista.get(musicListIndex),musicListIndex);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        music.start();
+        play = true;
+        ImageView playPauseButton = (ImageView) findViewById(R.id.imageView);
+        playPauseButton.setImageResource(R.drawable.pausebutton);
     }
 
     public void nextMusic(View view) throws IOException {
