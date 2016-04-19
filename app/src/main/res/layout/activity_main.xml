@@ -129,7 +129,7 @@
                 </LinearLayout>
 
                 <SeekBar
-                    android:layout_width="265dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/seekBar"
                     android:progressDrawable="@layout/progress_bar"
